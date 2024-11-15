@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import router from '@/router/index.js';
 import {currentUser, registerUser, signInUser, signOutUser} from "@/firebase/auth";
 import { ref } from "vue";
+import {useTasksStore} from "@/stores/tasksStore.js";
 
 export const useUserStore = defineStore('userStore', ()=> {
     const user = ref(null);
@@ -33,10 +34,14 @@ export const useUserStore = defineStore('userStore', ()=> {
         }
     }
 
-    const signOut = async (email, password) => {
+    const signOut = async () => {
         loading.value = true;
         try{
             await signOutUser();
+
+            const tasksStore = useTasksStore();
+            tasksStore.$reset();
+
             await router.push("/login");
         }catch(Error){
             console.log(Error);
