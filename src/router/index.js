@@ -11,10 +11,10 @@ const router = createRouter({
       component: () => import('../views/HomeView.vue')
     },
     {
-      path: '/about',
-      name: 'about',
+      path: '/done',
+      name: 'done',
       meta: {requiresAuth: true},
-      component: () => import('../views/AboutView.vue')
+      component: () => import('../views/DoneView.vue')
     },
     {
       path: '/register',
@@ -29,7 +29,13 @@ const router = createRouter({
     {
       path  :'/update/:id',
       name:'update',
+      meta : {requiresAuth: true},
       component: () => import('@/views/UpdateTaskView.vue')
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'notFile',
+      component: () => import('../views/NotFileView.vue')
     }
   ]
 })

@@ -1,5 +1,5 @@
 import {defineStore, storeToRefs} from "pinia";
-import {querySnapshot,addDocument, deleteDocument, getDocumentById, updateDocument} from "@/firebase/firestore.js";
+import {addDocument, deleteDocument, getDocumentById, querySnapshot, updateDocument} from "@/firebase/firestore.js";
 import {useUserStore} from '@/stores/userStore.js'
 import {ref} from "vue";
 
@@ -12,14 +12,13 @@ export const useTasksStore = defineStore('tasks',()=>{
     const {getCurrentUser} = userStore;
     const {user} = storeToRefs(userStore);
 
-    const getTasks = async () => {
+    const getTasks = async (done) => {
         loadingData.value = true;
+        tasks.value = [];
         try{
-            if(tasks.value.length !== 0) return;
-
             await getCurrentUser()
 
-            tasks.value = await querySnapshot(user.value.uid);
+            tasks.value = await querySnapshot(user.value.uid, done);
         }catch(error){
             console.log(error);
         }finally {
@@ -30,6 +29,8 @@ export const useTasksStore = defineStore('tasks',()=>{
     const addTask = async (task) => {
         loadingData.value = true;
         try{
+            if(task === '') return;
+
             await getCurrentUser();
 
             const obj = {
@@ -61,8 +62,7 @@ export const useTasksStore = defineStore('tasks',()=>{
     const getDocument = async (id) =>{
         loadingData.value = true;
         try{
-            const data = await getDocumentById(id);
-            return data;
+            return await getDocumentById(id);
         }catch(error){
             console.log(error);
         }finally{
@@ -73,12 +73,36 @@ export const useTasksStore = defineStore('tasks',()=>{
     const updateTask = async (id, description) =>{
         loadingData.value = true;
         try{
-            await updateDocument(id, description);
+            const obj = {
+                description : description
+            }
+            await updateDocument(id, obj);
             tasks.value = tasks.value.map((task)=>
                 task.id === id ? {...task, description} : task
             );
         }catch(error){
             console.log(error)
+        }finally {
+            loadingData.value = false;
+        }
+    }
+
+    const doneTask = async  (id, done) =>{
+        loadingData.value  = true;
+        try{
+            done = done === false;
+            const obj = {
+                done: done
+            }
+            await updateDocument(id, obj);
+
+            tasks.value = tasks.value.map((task)=>
+                task.id === id ? {...task, done } : task
+            );
+
+            tasks.value = tasks.value.filter(task=>task.done !== done);
+        }catch (error){
+            console.log(error);
         }finally {
             loadingData.value = false;
         }
@@ -96,6 +120,7 @@ export const useTasksStore = defineStore('tasks',()=>{
         deleteTask,
         $reset,
         getDocument,
-        updateTask
+        updateTask,
+        doneTask
     }
 })

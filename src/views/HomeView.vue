@@ -2,22 +2,17 @@
 import {useUserStore} from '@/stores/userStore.js'
 import {useTasksStore} from "@/stores/tasksStore.js";
 import {storeToRefs} from "pinia";
-import {onMounted, ref} from "vue";
-import {useRouter} from "vue-router";
+import {ref} from "vue";
+import ListTasks from "@/components/listTasks.vue";
 
 const userStore = useUserStore();
 const tasksStore = useTasksStore();
-const router = useRouter();
 
 const task = ref('This is a example');
-const {getTasks,addTask, deleteTask} = tasksStore;
+const {addTask} = tasksStore;
 
 const {user} = storeToRefs(userStore);
-const {tasks,loadingData} = storeToRefs(tasksStore);
-
-onMounted(async()=>{
-  await getTasks();
-});
+const {loadingData} = storeToRefs(tasksStore);
 
 const handleSubmit = () =>{
   addTask(task.value);
@@ -25,17 +20,18 @@ const handleSubmit = () =>{
 </script>
 
 <template>
-  <main>
-    <h1>Hello world {{user?.email}}</h1>
-    <form @submit.prevent="handleSubmit">
-      <input type="text" placeholder="task" v-model.trim="task">
-      <button type="submit" :disabled="loadingData">Add</button>
-    </form>
+  <main class="container mt-3">
+    <h1>Welcome {{user?.email}}</h1>
 
-    <template  v-for="task in tasks">
-      <p>{{task.description}} - {{task.done}} </p>
-      <button @click="deleteTask(task.id)" :disabled="loadingData">Delete</button>
-      <button :disabled="loadingData" @click="router.push(`/update/${task.id}`)">Update</button>
-    </template>
+    <form class="row g-3 mt-2" @submit.prevent="handleSubmit">
+      <div class="col-auto">
+        <label for="inputPassword2" class="visually-hidden">Task</label>
+        <input type="text" class="form-control" placeholder="task" id="inputPassword2" v-model.trim="task">
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary mb-3" :disabled="loadingData">Add</button>
+      </div>
+    </form>
+    <list-tasks :is-done="false"></list-tasks>
   </main>
 </template>

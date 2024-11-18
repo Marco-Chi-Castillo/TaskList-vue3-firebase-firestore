@@ -9,13 +9,13 @@ const router = useRouter();
 
 const tasksStore = useTasksStore();
 
-const {updateTask} = tasksStore;
+const {updateTask, getDocument} = tasksStore;
 const {loadingData} = storeToRefs(tasksStore);
 
 const description = ref('');
 
 onMounted(async ()=>{
-  const data = await tasksStore.getDocument(route.params.id);
+  const data = await getDocument(route.params.id);
   description.value = data?.description;
 });
 
@@ -29,8 +29,13 @@ const handleSubmit = () =>{
 <template>
   <h2>Task: {{route.params.id}}</h2>
   <p v-if="loadingData">loading...</p>
-    <form v-else @submit.prevent="handleSubmit">
-      <input type="text" placeholder="task" v-model.trim="description">
-      <button type="submit" :disabled="loadingData">Update</button>
-    </form>
+  <form v-else class="row g-3 mt-2" @submit.prevent="handleSubmit">
+    <div class="col-auto">
+      <label for="inputPassword2" class="visually-hidden">description</label>
+      <input type="text" class="form-control" placeholder="task" id="inputPassword2" v-model.trim="description">
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-primary mb-3" :disabled="loadingData">Update</button>
+    </div>
+  </form>
 </template>
